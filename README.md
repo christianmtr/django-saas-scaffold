@@ -6,10 +6,10 @@ Template [Copier](https://copier.readthedocs.io) para proyectos SaaS multi-tenan
 
 ```bash
 # Requiere copier instalado: pip install copier
-copier copy gh:TU_USUARIO/django-saas-scaffold mi-proyecto
+copier copy gh:christianmtr/django-saas-scaffold mi-proyecto
 
 # Sin instalarlo (con pipx):
-pipx run copier copy gh:TU_USUARIO/django-saas-scaffold mi-proyecto
+pipx run copier copy gh:christianmtr/django-saas-scaffold mi-proyecto
 ```
 
 ## Preguntas que hace Copier

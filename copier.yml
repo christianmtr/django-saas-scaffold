@@ -29,7 +29,7 @@ project_name:
   type: str
   help: "Nombre del proyecto (ej: RestaurantHub, GastroCore)"
   validator: >-
-    {% if not (project_name | regex_search('^[A-Za-z][A-Za-z0-9 _-]+$')) %}
+    {% if not (project_name | regex_search('^[A-Za-z][A-Za-z0-9 \_-]+$')) %}
     Solo letras, números, espacios, guiones y guiones bajos. Debe empezar con letra.
     {% endif %}
 

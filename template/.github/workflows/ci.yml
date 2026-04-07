@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  backend:
+    name: Backend — lint & tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: [[ project_slug ]]_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+[% if use_celery %]
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+[% endif %]
+
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.test
+      SECRET_KEY: ci-secret-key-not-used-in-production
+      DB_NAME: [[ project_slug ]]_test
+      DB_NAME_TEST: [[ project_slug ]]_test
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: localhost
+      DB_PORT: "5432"
+[% if use_celery %]      REDIS_URL: redis://localhost:6379/0
+[% endif %]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Set up Python [[ python_version ]]
+        run: uv python install [[ python_version ]]
+
+      - name: Install dependencies
+        working-directory: backend
+        run: uv sync
+
+      - name: Lint — ruff check
+        working-directory: backend
+        run: uv run ruff check .
+
+      - name: Lint — ruff format
+        working-directory: backend
+        run: uv run ruff format --check .
+
+      - name: Tests con cobertura
+        working-directory: backend
+        run: uv run pytest --cov=apps --cov-report=xml -q
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: backend/coverage.xml
+        continue-on-error: true
+[% if use_frontend %]
+
+  frontend:
+    name: Frontend — type-check & lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install
+        working-directory: frontend
+        run: pnpm install
+
+      - name: Type-check
+        working-directory: frontend
+        run: pnpm tsc --noEmit
+
+      - name: Lint
+        working-directory: frontend
+        run: pnpm eslint src --max-warnings 0
+[% endif %]

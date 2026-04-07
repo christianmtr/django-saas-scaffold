@@ -1,0 +1,52 @@
+[project]
+name = "[[ project_slug ]]"
+version = "[[ version ]]"
+description = "[[ project_description ]]"
+authors = [{ name = "[[ author_name ]]", email = "[[ author_email ]]" }]
+requires-python = ">=[[ python_version ]]"
+dependencies = [
+    "django>=5.1",
+    "djangorestframework>=3.15",
+    "django-tenants>=3.7",
+    "drf-spectacular>=0.27",
+    "djangorestframework-simplejwt>=5.3",
+    "django-environ>=0.11",
+    "django-auditlog>=3.0",
+    "psycopg2-binary>=2.9",
+    "gunicorn>=22.0",
+[% if use_celery %]    "celery>=5.4",
+    "redis>=5.0",
+[% endif %]
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-django>=4.9",
+    "factory-boy>=3.3",
+    "django-extensions>=3.2",
+    "django-cors-headers>=4.4",
+    "ruff>=0.6",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py[[ python_version | replace('.', '') ]]"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["apps", "api", "config"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "--strict-markers --tb=short -q"
+markers = [
+    "slow: tests que tardan más de lo normal",
+    "integration: tests con servicios externos",
+]

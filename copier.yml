@@ -1,0 +1,160 @@
+# copier.yml
+# Template base para proyectos SaaS con Django multi-tenant.
+#
+# Uso:
+#   copier copy gh:TU_USUARIO/django-saas-scaffold mi-proyecto
+#   copier copy gh:TU_USUARIO/django-saas-scaffold mi-proyecto --trust
+#
+# Actualizar un proyecto ya generado:
+#   copier update  (desde la raíz del proyecto)
+
+_min_copier_version: "9.0"
+
+# Delimitadores personalizados para no conflictuar con Django templates
+_envops:
+  block_start_string: "[%"
+  block_end_string: "%]"
+  variable_start_string: "[["
+  variable_end_string: "]]"
+  comment_start_string: "[#"
+  comment_end_string: "#]"
+
+_subdirectory: "template"
+
+# ---------------------------------------------------------------------------
+# Preguntas — datos del proyecto
+# ---------------------------------------------------------------------------
+
+project_name:
+  type: str
+  help: "Nombre del proyecto (ej: RestaurantHub, GastroCore)"
+  validator: >-
+    {% if not (project_name | regex_search('^[A-Za-z][A-Za-z0-9 _-]+$')) %}
+    Solo letras, números, espacios, guiones y guiones bajos. Debe empezar con letra.
+    {% endif %}
+
+project_slug:
+  type: str
+  help: "Slug del proyecto — nombre del schema PostgreSQL y carpeta del módulo Django (ej: restauranthub)"
+  default: "{{ project_name | lower | replace(' ', '_') | replace('-', '_') }}"
+  validator: >-
+    {% if not (project_slug | regex_search('^[a-z][a-z0-9_]+$')) %}
+    Solo minúsculas, números y guiones bajos. Debe empezar con letra.
+    {% endif %}
+
+project_description:
+  type: str
+  help: "Descripción corta del proyecto (una línea)"
+  default: "SaaS multi-tenant con Django"
+
+author_name:
+  type: str
+  help: "Tu nombre o el de tu empresa"
+
+author_email:
+  type: str
+  help: "Email de contacto"
+  validator: >-
+    {% if not (author_email | regex_search('^[^@]+@[^@]+\.[^@]+$')) %}
+    Ingresa un email válido.
+    {% endif %}
+
+github_username:
+  type: str
+  help: "Tu usuario de GitHub (para badges y URLs en el README)"
+  default: ""
+
+timezone:
+  type: str
+  help: "Timezone del servidor"
+  default: "America/Lima"
+  choices:
+    - "America/Lima"
+    - "America/Bogota"
+    - "America/Santiago"
+    - "America/Mexico_City"
+    - "America/Argentina/Buenos_Aires"
+    - "America/Sao_Paulo"
+    - "UTC"
+
+base_domain:
+  type: str
+  help: "Dominio base del proyecto (ej: miapp.pe). Los tenants usarán tenant.base_domain"
+  default: "localhost"
+
+version:
+  type: str
+  help: "Versión inicial del proyecto"
+  default: "0.1.0"
+
+python_version:
+  type: str
+  help: "Versión de Python"
+  default: "3.12"
+  choices:
+    - "3.12"
+    - "3.13"
+
+# ---------------------------------------------------------------------------
+# Componentes opcionales
+# ---------------------------------------------------------------------------
+
+use_celery:
+  type: bool
+  help: "¿Incluir Celery + Redis para tareas asíncronas? (emails, notificaciones, jobs)"
+  default: false
+
+use_frontend:
+  type: bool
+  help: "¿Incluir frontend React 19 + Vite + TypeScript en el mismo repo?"
+  default: true
+
+# ---------------------------------------------------------------------------
+# Siempre incluidos (no se preguntan)
+# use_docker: true
+# use_github_actions: true
+# use_auditlog: true
+# ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# Tareas post-generación
+# ---------------------------------------------------------------------------
+
+_tasks:
+  - "echo ''"
+  - "echo '✅  Proyecto [[project_name]] generado correctamente.'"
+  - "echo ''"
+  - "echo '📋 Próximos pasos:'"
+  - "echo '   1. cd [[project_slug]]'"
+  - "echo '   2. cp backend/.env.example backend/.env'"
+  - "echo '   3. Edita backend/.env con tus credenciales'"
+  - "echo '   4. docker compose -f compose.dev.yml up --build'"
+  - "echo '   5. docker compose -f compose.dev.yml exec backend python manage.py migrate_schemas --shared'"
+  - "echo '   6. docker compose -f compose.dev.yml exec backend python manage.py createsuperuser'"
+  - "echo ''"
+  - "echo '🔄 Para actualizar desde el scaffold en el futuro: copier update'"
+
+_message_after_copy: |
+
+  ╔════════════════════════════════════════════════════════╗
+  ║  [[ project_name ]] — listo para desarrollar          ║
+  ╚════════════════════════════════════════════════════════╝
+
+  Stack base (siempre incluido):
+    Django 5 + DRF + django-tenants       ✅
+    drf-spectacular (OpenAPI)             ✅
+    django-auditlog                       ✅
+    pytest + Factory Boy                  ✅
+    Docker + docker-compose (dev/prod)    ✅
+    GitHub Actions CI/CD                  ✅
+
+  Opcionales elegidos:
+    Celery + Redis                        [[ '✅' if use_celery else '—' ]]
+    Frontend React + Vite + TypeScript    [[ '✅' if use_frontend else '—' ]]
+
+_exclude:
+  - copier.yml
+  - README_SCAFFOLD.md
+  - .git
+  - "*.pyc"
+  - __pycache__

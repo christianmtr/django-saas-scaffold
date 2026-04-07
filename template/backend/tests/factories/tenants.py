@@ -3,7 +3,7 @@ from __future__ import annotations
 import factory
 from factory.django import DjangoModelFactory
 
-from apps.tenants.models import Domain, Tenant
+from template.backend.apps.tenants.organization.models import Domain, Tenant
 
 
 class TenantFactory(DjangoModelFactory):

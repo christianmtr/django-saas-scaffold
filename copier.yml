@@ -1,16 +1,9 @@
 # copier.yml
-# Template base para proyectos SaaS con Django multi-tenant.
-#
-# Uso:
-#   copier copy gh:TU_USUARIO/django-saas-scaffold mi-proyecto
-#   copier copy gh:TU_USUARIO/django-saas-scaffold mi-proyecto --trust
-#
-# Actualizar un proyecto ya generado:
-#   copier update  (desde la raíz del proyecto)
-
 _min_copier_version: "9.0"
 
 # Delimitadores personalizados para no conflictuar con Django templates
+# NOTA: Al usar estos, las lógicas de control dentro de este archivo 
+# deben usar estos nuevos delimitadores.
 _envops:
   block_start_string: "[%"
   block_end_string: "%]"
@@ -28,23 +21,26 @@ _subdirectory: "template"
 project_name:
   type: str
   help: "Nombre del proyecto (ej: RestaurantHub, GastroCore)"
+  # CORRECCIÓN: Usamos los nuevos delimitadores [% %] y la variable especial '@value'
+  # que representa lo que el usuario escribió en este campo.
   validator: >-
-    {% if not (project_name | regex_search('^[A-Za-z][A-Za-z0-9 _-]+$')) %}
+    [% if not (@value | regex_search('^[A-Za-z][A-Za-z0-9 _-]+$')) %]
     Solo letras, números, espacios, guiones y guiones bajos. Debe empezar con letra.
-    {% endif %}
+    [% endif %]
 
 project_slug:
   type: str
-  help: "Slug del proyecto — nombre del schema PostgreSQL y carpeta del módulo Django (ej: restauranthub)"
-  default: "{{ project_name | lower | replace(' ', '_') | replace('-', '_') }}"
+  help: "Slug del proyecto — nombre del schema PostgreSQL y carpeta del módulo Django"
+  # CORRECCIÓN: El default ahora debe usar [[ ]]
+  default: "[[ project_name | lower | replace(' ', '_') | replace('-', '_') ]]"
   validator: >-
-    {% if not (project_slug | regex_search('^[a-z][a-z0-9_]+$')) %}
+    [% if not (@value | regex_search('^[a-z][a-z0-9_]+$')) %]
     Solo minúsculas, números y guiones bajos. Debe empezar con letra.
-    {% endif %}
+    [% endif %]
 
 project_description:
   type: str
-  help: "Descripción corta del proyecto (una línea)"
+  help: "Descripción corta del proyecto"
   default: "SaaS multi-tenant con Django"
 
 author_name:
@@ -55,13 +51,13 @@ author_email:
   type: str
   help: "Email de contacto"
   validator: >-
-    {% if not (author_email | regex_search('^[^@]+@[^@]+\.[^@]+$')) %}
+    [% if not (@value | regex_search('^[^@]+@[^@]+\.[^@]+$')) %]
     Ingresa un email válido.
-    {% endif %}
+    [% endif %]
 
 github_username:
   type: str
-  help: "Tu usuario de GitHub (para badges y URLs en el README)"
+  help: "Tu usuario de GitHub"
   default: ""
 
 timezone:
@@ -79,12 +75,12 @@ timezone:
 
 base_domain:
   type: str
-  help: "Dominio base del proyecto (ej: miapp.pe). Los tenants usarán tenant.base_domain"
+  help: "Dominio base (ej: miapp.pe)"
   default: "localhost"
 
 version:
   type: str
-  help: "Versión inicial del proyecto"
+  help: "Versión inicial"
   default: "0.1.0"
 
 python_version:
@@ -95,26 +91,15 @@ python_version:
     - "3.12"
     - "3.13"
 
-# ---------------------------------------------------------------------------
-# Componentes opcionales
-# ---------------------------------------------------------------------------
-
 use_celery:
   type: bool
-  help: "¿Incluir Celery + Redis para tareas asíncronas? (emails, notificaciones, jobs)"
+  help: "¿Incluir Celery + Redis?"
   default: false
 
 use_frontend:
   type: bool
-  help: "¿Incluir frontend React 19 + Vite + TypeScript en el mismo repo?"
+  help: "¿Incluir frontend React 19 + Vite + TypeScript?"
   default: true
-
-# ---------------------------------------------------------------------------
-# Siempre incluidos (no se preguntan)
-# use_docker: true
-# use_github_actions: true
-# use_auditlog: true
-# ---------------------------------------------------------------------------
 
 # ---------------------------------------------------------------------------
 # Tareas post-generación
@@ -125,28 +110,14 @@ _tasks:
   - "echo '✅  Proyecto [[project_name]] generado correctamente.'"
   - "echo ''"
   - "echo '📋 Próximos pasos:'"
-  - "echo '   1. cd [[project_slug]]'"
-  - "echo '   2. cp backend/.env.example backend/.env'"
-  - "echo '   3. Edita backend/.env con tus credenciales'"
-  - "echo '   4. docker compose -f compose.dev.yml up --build'"
-  - "echo '   5. docker compose -f compose.dev.yml exec backend python manage.py migrate_schemas --shared'"
-  - "echo '   6. docker compose -f compose.dev.yml exec backend python manage.py createsuperuser'"
-  - "echo ''"
-  - "echo '🔄 Para actualizar desde el scaffold en el futuro: copier update'"
+  - "echo '    1. cd [[project_slug]]'"
+  - "echo '    2. cp backend/.env.example backend/.env'"
+  - "echo '    3. Edita backend/.env con tus credenciales'"
 
 _message_after_copy: |
-
   ╔════════════════════════════════════════════════════════╗
-  ║  [[ project_name ]] — listo para desarrollar          ║
+  ║  [[ project_name ]] — listo para desarrollar           ║
   ╚════════════════════════════════════════════════════════╝
-
-  Stack base (siempre incluido):
-    Django 5 + DRF + django-tenants       ✅
-    drf-spectacular (OpenAPI)             ✅
-    django-auditlog                       ✅
-    pytest + Factory Boy                  ✅
-    Docker + docker-compose (dev/prod)    ✅
-    GitHub Actions CI/CD                  ✅
 
   Opcionales elegidos:
     Celery + Redis                        [[ '✅' if use_celery else '—' ]]
@@ -154,7 +125,6 @@ _message_after_copy: |
 
 _exclude:
   - copier.yml
-  - README_SCAFFOLD.md
   - .git
   - "*.pyc"
   - __pycache__

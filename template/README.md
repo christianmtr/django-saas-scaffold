@@ -79,11 +79,15 @@ docker compose -f compose.dev.yml exec backend \
 .
 ├── backend/
 │   ├── apps/
-│   │   ├── core/           ← BaseModel, excepciones base
-│   │   ├── tenants/        ← Tenant + Domain
-│   │   └── <tu-dominio>/   ← Apps de negocio (agregar aquí)
-│   ├── api/v1/router.py    ← Registrar URLs aquí
-│   ├── config/settings/    ← base / dev / prod / test
+│   │   ├── shared/         ← SHARED_APPS (schema public)
+│   │   │   ├── core/       ← BaseModel, excepciones base
+│   │   │   └── tenants/    ← Tenant + Domain
+│   │   └── tenant/         ← TENANT_APPS (schema por cliente)
+│   │       └── <dominio>/  ← Apps de negocio (agregar aquí)
+│   ├── config/
+│   │   ├── settings/       ← base / dev / prod / test
+│   │   ├── urls.py         ← Registrar URLs de cada app aquí
+│   │   └── urls_public.py
 │   └── tests/
 [% if use_frontend %]├── frontend/src/
 │   ├── api/                ← Cliente tipado (auto-generado)

@@ -4,7 +4,7 @@ import pytest
 from django_tenants.test.client import TenantClient
 from django_tenants.utils import schema_context
 
-from template.backend.apps.tenants.organization.models import Domain, Tenant
+from apps.tenants.models import Domain, Tenant
 
 
 @pytest.fixture(scope="function")

@@ -63,7 +63,7 @@ Request → View → Service → Selector / Model → Response
 
 ## Modelos
 
-- Todo modelo de tenant hereda de `BaseModel` (`apps/core/models.py`)
+- Todo modelo de tenant hereda de `BaseModel` (`apps/shared/core/models.py`)
 - `BaseModel` provee: `id` (UUIDv4), `created_at`, `updated_at`
 - Registrar modelos sensibles en auditlog:
   ```python
@@ -78,13 +78,13 @@ Request → View → Service → Selector / Model → Response
 ## Estructura de una app de dominio
 
 ```
-apps/<dominio>/
+apps/tenant/<dominio>/
 ├── models.py       ← Hereda de BaseModel
 ├── serializers.py  ← Separar Create/Update/Out
 ├── services.py     ← Lógica de negocio con verbos
 ├── selectors.py    ← Queries de solo lectura
 ├── views.py        ← Solo HTTP
-├── urls.py
+├── urls.py         ← Incluir desde config/urls.py
 ├── exceptions.py   ← Excepciones propias del dominio
 ├── constants.py    ← Constantes del dominio
 ├── admin.py
@@ -94,7 +94,7 @@ apps/<dominio>/
     └── test_views.py
 ```
 
-Registrar la app en `TENANT_APPS` (settings) y sus URLs en `api/v1/router.py`.
+Registrar la app en `TENANT_APPS` en `config/settings/base.py` y sus URLs directamente en `config/urls.py`.
 
 ---
 

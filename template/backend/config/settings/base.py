@@ -18,8 +18,8 @@ ALLOWED_HOSTS: list[str] = env.list("ALLOWED_HOSTS", default=[])
 # ---------------------------------------------------------------------------
 SHARED_APPS = [
     "django_tenants",
-    "apps.tenants",
-    "apps.core",
+    "apps.shared.tenants",
+    "apps.shared.core",
     "django.contrib.contenttypes",
     "django.contrib.auth",
     "django.contrib.admin",
@@ -34,15 +34,15 @@ SHARED_APPS = [
 
 TENANT_APPS: list[str] = [
     # Agregar aquí las apps de dominio de negocio
-    # Ejemplo: "apps.reservations",
+    # Ejemplo: "apps.tenant.reservations",
 ]
 
 INSTALLED_APPS = list(SHARED_APPS) + [
     app for app in TENANT_APPS if app not in SHARED_APPS
 ]
 
-TENANT_MODEL = "tenants.Tenant"
-TENANT_DOMAIN_MODEL = "tenants.Domain"
+TENANT_MODEL = "shared_tenants.Tenant"
+TENANT_DOMAIN_MODEL = "shared_tenants.Domain"
 
 # ---------------------------------------------------------------------------
 # Middleware

@@ -21,20 +21,18 @@ _subdirectory: "template"
 project_name:
   type: str
   help: "Nombre del proyecto (ej: RestaurantHub, GastroCore)"
-  # CORRECCIÓN: Usamos los nuevos delimitadores [% %] y la variable especial '@value'
-  # que representa lo que el usuario escribió en este campo.
+  # Eliminamos @value y usamos la variable directamente con los nuevos tags
   validator: >-
-    [% if not (@value | regex_search('^[A-Za-z][A-Za-z0-9 _-]+$')) %]
+    [% if not (project_name | regex_search('^[A-Za-z][A-Za-z0-9 _-]+$')) %]
     Solo letras, números, espacios, guiones y guiones bajos. Debe empezar con letra.
     [% endif %]
 
 project_slug:
   type: str
   help: "Slug del proyecto — nombre del schema PostgreSQL y carpeta del módulo Django"
-  # CORRECCIÓN: El default ahora debe usar [[ ]]
   default: "[[ project_name | lower | replace(' ', '_') | replace('-', '_') ]]"
   validator: >-
-    [% if not (@value | regex_search('^[a-z][a-z0-9_]+$')) %]
+    [% if not (project_slug | regex_search('^[a-z][a-z0-9_]+$')) %]
     Solo minúsculas, números y guiones bajos. Debe empezar con letra.
     [% endif %]
 
@@ -51,7 +49,7 @@ author_email:
   type: str
   help: "Email de contacto"
   validator: >-
-    [% if not (@value | regex_search('^[^@]+@[^@]+\.[^@]+$')) %]
+    [% if not (author_email | regex_search('^[^@]+@[^@]+\\.[^@]+$')) %]
     Ingresa un email válido.
     [% endif %]
 
